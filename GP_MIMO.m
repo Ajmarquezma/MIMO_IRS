@@ -3,8 +3,8 @@ clear all
 clc
 
 % MIMO Environment settings
-M = 4;
-K = 4;
+M = 120;
+K = 2;
 SETTING_STRING = sprintf('M%d_K%d_alpha_0.2', M, K);
 BANDWIDTH = 10e6;
 TX_POWER_TOTAL = 1;

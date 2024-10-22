@@ -8,12 +8,12 @@ from tqdm import trange
 import argparse
 import matplotlib.pyplot as plt
 from settings_MIMO import *
-from networks_generator_MIMO import generate_real_channels, estimate_channels
+from networks_generator_MIMO import generate_real_channels, estimate_channels, validate_channels
 from neural_net_MIMO import Regular_Net, Robust_Net
 
 N_EPOCHES = 500
-N_MINIBATCHES = 50
-MINIBATCH_SIZE = 1000
+N_MINIBATCHES = 10
+#MINIBATCH_SIZE = 1000
 VALIDATION_SIZE = 2000
 TRAINING_DEBUG = False
 
@@ -61,7 +61,8 @@ if(__name__=="__main__"):
         robust_net.train()
         for j in range(N_MINIBATCHES):
             # Generate minibatch training data online
-            H_est = estimate_channels(generate_real_channels(MINIBATCH_SIZE))
+            H_real = generate_real_channels(f'Data_MIMO/data/Flug{j+1}/Chans_EKF_{j+1}.mat')
+            H_est = estimate_channels(f'Data_MIMO/data/Flug{j+1}/Chans_VIC_{j+1}.mat')
             # [Regular net]
             regular_optimizer.zero_grad()
             robust_optimizer.zero_grad()
@@ -72,7 +73,8 @@ if(__name__=="__main__"):
             regular_obj_ep += regular_obj.item() / N_MINIBATCHES
             robust_obj_ep += robust_obj.item() / N_MINIBATCHES
         # [VALIDATE]
-        H_est = estimate_channels(generate_real_channels(VALIDATION_SIZE))
+        index=random.randint(1, 10)
+        H_est = validate_channels(generate_real_channels(f'Data_MIMO/data/Flug{index}/Chans_EKF_{index}.mat'))
         with torch.no_grad():
             regular_obj, _ = regular_net(torch.tensor(H_est, dtype=torch.cfloat).to(DEVICE))
             regular_obj = regular_obj.item()

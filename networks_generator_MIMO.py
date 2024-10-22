@@ -23,11 +23,11 @@ def generate_real_channels(flug_path):
 
 
     # Check the shapes of the arrays
-    print(f"Shape of H_1: {np.shape(H_1)}")
-    print(f"Shape of H_2: {np.shape(H_2)}")
+    # print(f"Shape of H_1: {np.shape(H_1)}")
+    # print(f"Shape of H_2: {np.shape(H_2)}")
     # Combine the arrays into a 3D matrix
     Channel = np.stack((H_1, H_2), axis=0).transpose()
-    print(f"Shape of Channel: {np.shape(Channel)}")
+    # print(f"Shape of Channel: {np.shape(Channel)}")
     return Channel
 
 
@@ -51,11 +51,22 @@ def estimate_channels(flug_path):
 
 
     # Check the shapes of the arrays
-    print(f"Shape of H_1_est: {np.shape(H_1)}")
-    print(f"Shape of H_2_est: {np.shape(H_2)}")
+    # print(f"Shape of H_1_est: {np.shape(H_1)}")
+    # print(f"Shape of H_2_est: {np.shape(H_2)}")
     # Combine the arrays into a 3D matrix
     H_est = np.stack((H_1, H_2), axis=0).transpose()
-    print(f"Shape of H_est: {np.shape(H_est)}")
+    # print(f"Shape of H_est: {np.shape(H_est)}")
+    return H_est
+
+
+def validate_channels(H):
+    n_networks = np.shape(H)[0]
+    n_BS_reals = np.random.normal(loc=0.0, scale=np.sqrt(NOISE_POWER/2), size=(n_networks, M, K))
+    n_BS_imags = np.random.normal(loc=0.0, scale=np.sqrt(NOISE_POWER/2), size=(n_networks, M, K))
+    n_BS = n_BS_reals + 1j*n_BS_imags
+    pilots_received_BS = np.sqrt(ESTIMATION_PILOT_POWER)*np.conjugate(H) + n_BS
+    H_conj_est = np.sqrt(ESTIMATION_PILOT_POWER)/(ESTIMATION_PILOT_POWER+NOISE_POWER) * pilots_received_BS
+    H_est = np.conjugate(H_conj_est)
     return H_est
 
 # Utilize only channel estimates
